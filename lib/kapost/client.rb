@@ -2,6 +2,10 @@ module Kapost
   class Client
 
     include Content
+    include Newsroom
+
+    RESPONSE_SUCCESS = :success
+    RESPONSE_FAILURE = :failure
 
     attr_accessor *Configuration::VALID_PARAMS
 
@@ -21,7 +25,9 @@ module Kapost
         raise ArgumentError, "Required parameter: #{param} is not set" if config[param].nil?
       end
 
-      Configuration::VALID_PARAMS.each { |key| send("#{key}=", config[key]) }
+      Configuration::VALID_PARAMS.each do |key|
+        Kapost.send("#{key}=", config[key])
+      end
 
       fqdn = [Kapost.instance, Kapost.domain].join('.')
       url  = ["https://#{fqdn}", Kapost.api_path, Kapost.api_version].join('/')
@@ -38,7 +44,7 @@ module Kapost
     # @param [Hash] params Parameters to be sent with the request
     # @return [Hash] response body
     def get(path, params)
-      parse_response @client[path].get(:params => params)
+      request(:get, path, :params => params)
     end
 
     # Performs an HTTP POST operation
@@ -48,7 +54,7 @@ module Kapost
     # @param [Hash] params Parameters to be sent with the request
     # @return [Hash] response body
     def post(path, params)
-      parse_response @client[path].post(params)
+      request(:post, path, params)
     end
 
     # Performs an HTTP PUT operation
@@ -58,7 +64,7 @@ module Kapost
     # @param [Hash] params Parameters to be sent with the request
     # @return [Hash] response body
     def put(path, params)
-      parse_response @client[path].put(params)
+      request(:put, path, params)
     end
 
     # Performs an HTTP DELETE operation
@@ -68,7 +74,13 @@ module Kapost
     # @param [Hash] params Parameters to be sent with the request
     # @return [Boolean]
     def delete(path, params)
-      parse_response @client[path].delete(:params => params)
+      request(:delete, path, :params => params)
+    end
+
+    def request(method, path, params)
+      parse_response @client[path].send(method, params) { |response, request, result|
+        response
+      }
     end
 
     # Validates the response & raises any errors encountered
@@ -78,31 +90,23 @@ module Kapost
     # @return [Hash] The response body
     # @raise [KapostError]
     def parse_response(response)
+      json_response = JSON.parse(response, :symbolize_names => true)
+
+      data = nil
       case response.code
       # Successful get/create/update
       when 200..201
-        JSON.parse(response, :symbolize_names => true)[:response]
+        data = json_response[:response]
       # Successful delete
       when 204
         true
-      when 400
-        raise Kapost::BadRequest, "[#{response.code}] Input parameters were missing or in the incorrect format"
-      when 401
-        raise Kapost::Unauthorized, "[#{response.code}] Incorrect authentication credentials"
-      when 403
-        raise Kapost::Forbidden, "[#{response.code}] Credentials were correct but the account doesn't have permission to perform the action)"
-      when 404
-        raise Kapost::NotFound, "[#{response.code}] The entity requested by id or slug doesn't exist)"
-      when 500
-        raise Kapost::ServerError, response.code
-      when 502
-        raise Kapost::BadGateway, response.code
-      when 503
-        raise Kapost::ServiceUnavailable, response.code
+      when 400..503
+        data = json_response
       else
-        raise "Response was not understood"
+        raise 'Response was not understood'
       end
-    end
 
+      Kapost::Result.new(response.code, data)
+    end
   end
 end

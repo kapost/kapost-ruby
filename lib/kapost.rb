@@ -5,7 +5,7 @@ require 'kapost/version'
 require 'kapost/configuration'
 require 'kapost/result'
 require 'kapost/content'
-require 'kapost/newsroom'
+require 'kapost/custom_fields'
 require 'kapost/client'
 
 module Kapost

@@ -2,7 +2,7 @@ module Kapost
   class Client
 
     include Content
-    include Newsroom
+    include CustomFields
 
     RESPONSE_SUCCESS = :success
     RESPONSE_FAILURE = :failure
@@ -35,7 +35,81 @@ module Kapost
       @client = ::RestClient::Resource.new(url, :user => Kapost.api_token, :password => nil, :user_agent => Kapost.user_agent)
     end
 
+    protected
+    # Creates a piece of content
+    #
+    # @param [Hash] params Parameters
+    def create_action(path, params)
+      post(path, params) if valid_params(path, params)
+    end
+
+    # Lists content
+    #
+    # @param [Hash] params Parameters
+    def list_action(path, params)
+      get(path, params) if valid_params(path, params)
+    end
+
+    # Shows a piece of content
+    #
+    # @param [Hash] params Parameters
+    def show_action(path, params)
+      get(set_path(path, params[:id]), params) if valid_params(path, params)
+    end
+
+    # Updates a piece of content
+    #
+    # @param [Hash] params Parameters
+    def update_action(path, params)
+      put(set_path(path, params[:id]), params) if valid_params(path, params)
+    end
+
+    # Deletes a piece of content
+    #
+    # @param [Hash] params Parameters
+    def delete_action(path, params)
+      delete(set_path(path, params[:id]), params) if valid_params(path, params)
+    end
+
     private
+
+    # Sets a the path to a specific piece of content
+    #
+    # @param [String] id ID or slug of the content
+    # @return [String] Content path
+    def set_path(path, id)
+      [path, id].join('/')
+    end
+
+    def action_params(path)
+      if respond_to? "#{path}_params"
+        send("#{path}_params")
+      else
+        {}
+      end
+    end
+
+    # Validates correct parameters are being used
+    #
+    # @private
+    # @param [Hash] params Hash of parameters
+    # @return [true|false]
+    def valid_params(path, params)
+      keys = params.keys
+
+      # Is this anywhere near a good idea or am I being too cute here?
+      operation = caller[0][/`([^']*)'/, 1]
+      action = operation.split('_', 2).first
+
+      params = action_params(path)
+
+      if params.has_key? action
+        return keys - params[action] === []
+      end
+
+      # if we haven't defined valid params for the perticular action then allow everything
+      return true
+    end
 
     # Performs an HTTP GET operation
     #

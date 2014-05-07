@@ -2,6 +2,7 @@ module Kapost
   class Client
 
     include Content
+    include ContentType
     include CustomFields
 
     RESPONSE_SUCCESS = :success
@@ -30,7 +31,7 @@ module Kapost
       end
 
       fqdn = [Kapost.instance, Kapost.domain].join('.')
-      url  = ["https://#{fqdn}", Kapost.api_path, Kapost.api_version].join('/')
+      url  = ["#{Kapost.protocol}://#{fqdn}", Kapost.api_path, Kapost.api_version].join('/')
 
       @client = ::RestClient::Resource.new(url, :user => Kapost.api_token, :password => nil, :user_agent => Kapost.user_agent)
     end

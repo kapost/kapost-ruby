@@ -15,9 +15,10 @@ module Kapost
   #   end
   #
   module Configuration
-    VALID_PARAMS    = [:api_token, :api_version, :endpoint, :instance, :api_path, :format, :user_agent, :domain].freeze
+    VALID_PARAMS    = [:api_token, :api_version, :endpoint, :instance, :api_path, :format, :user_agent, :protocol, :domain].freeze
     REQUIRED_PARAMS = [:api_token, :instance]
 
+    DEFAULT_PROTOCOL    = 'https'
     DEFAULT_DOMAIN      = 'kapost.com'
     DEFAULT_API_TOKEN   = nil
     DEFAULT_API_VERSION = 'v1'
@@ -35,6 +36,7 @@ module Kapost
 
     # Applies default configuration options when the module is extended
     def apply_config
+      self.protocol    = DEFAULT_PROTOCOL
       self.domain      = DEFAULT_DOMAIN
       self.api_token   = DEFAULT_API_TOKEN
       self.api_version = DEFAULT_API_VERSION

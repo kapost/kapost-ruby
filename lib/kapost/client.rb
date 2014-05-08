@@ -165,7 +165,14 @@ module Kapost
     # @return [Hash] The response body
     # @raise [KapostError]
     def parse_response(response)
-      json_response = JSON.parse(response, :symbolize_names => true)
+      json_response = nil
+
+      begin
+        json_response = JSON.parse(response, :symbolize_names => true)
+      rescue Exception => ex
+        logger.info response
+        logger.error ex.message
+      end
 
       data = nil
       case response.code
@@ -182,6 +189,10 @@ module Kapost
       end
 
       Kapost::Result.new(response.code, data)
+    end
+
+    def logger
+      Kapost.logger
     end
   end
 end

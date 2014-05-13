@@ -7,5 +7,13 @@ module Kapost
       self.data = data
       self.success = (code <= 399)
     end
+
+    def data=(value)
+      if value.is_a? String
+        value = { :error_description => value }
+      end
+
+      @data = value
+    end
   end
 end

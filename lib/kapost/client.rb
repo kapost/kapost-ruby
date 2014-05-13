@@ -153,9 +153,13 @@ module Kapost
     end
 
     def request(method, path, params)
+      begin
       parse_response @client[path].send(method, params) { |response, request, result|
         response
       }
+      rescue RestClient::RequestTimeout => ex
+        Kapost::Result.new(500, ex.message)
+      end
     end
 
     # Validates the response & raises any errors encountered

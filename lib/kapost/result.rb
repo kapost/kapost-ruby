@@ -5,7 +5,7 @@ module Kapost
     def initialize(code, data)
       self.code = code
       self.data = data
-      self.success = (code <= 399)
+      self.success = (code < 300)
     end
 
     def data=(value)

@@ -186,6 +186,8 @@ module Kapost
       # Successful delete
       when 204
         true
+      when 300..399
+        data = 'Unauthorized redirect'
       when 400..503
         data = json_response
       else

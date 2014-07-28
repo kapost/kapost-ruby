@@ -4,6 +4,8 @@ module Kapost
     include Content
     include ContentType
     include CustomFields
+    include Persona
+    include BuyingStage
 
     RESPONSE_SUCCESS = :success
     RESPONSE_FAILURE = :failure

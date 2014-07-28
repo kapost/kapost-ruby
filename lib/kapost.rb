@@ -9,6 +9,8 @@ require 'kapost/result'
 require 'kapost/content'
 require 'kapost/content_type'
 require 'kapost/custom_fields'
+require 'kapost/persona'
+require 'kapost/buying_stage'
 require 'kapost/client'
 
 module Kapost

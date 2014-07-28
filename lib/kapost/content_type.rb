@@ -9,17 +9,19 @@ module Kapost
       end
     end
 
-    [:create].each do |action|
+    [:create, :list].each do |action|
       define_method :"#{action}_content_type" do |params|
         send("#{action}_action", 'content_types', params)
       end
     end
 
-    def content_params
-      @content_params || {}.tap do |p|
+    def content_types_params
+      @content_types_params || {}.tap do |p|
         p[:create] = [
           :field_name, :display_name, :body_type
         ]
+
+        p[:list] = []
       end
     end
   end

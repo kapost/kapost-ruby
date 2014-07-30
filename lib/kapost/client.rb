@@ -159,7 +159,8 @@ module Kapost
       parse_response @client[path].send(method, params) { |response, request, result|
         response
       }
-      rescue RestClient::RequestTimeout => ex
+      rescue Timeout::Error, Errno::EINVAL, Errno::ECONNRESET, Errno::ECONNREFUSED, EOFError,
+          Net::HTTPBadResponse, Net::HTTPHeaderSyntaxError, Net::ProtocolError, RestClient::RequestTimeout => ex
         Kapost::Result.new(500, ex.message)
       end
     end

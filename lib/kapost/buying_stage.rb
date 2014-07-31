@@ -1,7 +1,7 @@
 module Kapost
   module BuyingStage
 
-    [:create, :list].each do |action|
+    [:create, :list, :update, :delete].each do |action|
       define_method :"#{action}_buying_stage" do |params|
         send("#{action}_action", 'buying_stages', params)
       end
@@ -14,6 +14,8 @@ module Kapost
         ]
 
         p[:list] = []
+        p[:update] = p[:create] + [:id]
+        p[:delete] = [:id]
       end
     end
   end

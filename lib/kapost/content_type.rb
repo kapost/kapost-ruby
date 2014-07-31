@@ -9,7 +9,7 @@ module Kapost
       end
     end
 
-    [:create, :list].each do |action|
+    [:create, :list, :update, :delete].each do |action|
       define_method :"#{action}_content_type" do |params|
         send("#{action}_action", 'content_types', params)
       end
@@ -22,6 +22,8 @@ module Kapost
         ]
 
         p[:list] = []
+        p[:update] = p[:create] + [:id]
+        p[:delete] = [:id]
       end
     end
   end
